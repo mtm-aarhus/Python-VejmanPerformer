@@ -98,7 +98,7 @@ def process(orchestrator_connection: OrchestratorConnection, queue_element: Queu
                 conn.commit()  # Save changes to the database
                 orchestrator_connection.log_info(f"Added new row with ID '{CaseID}', nonce '{Nonce}' and Filename '{Filename}'")
 
-                download_and_upload_file_to_sharepoint(orchestrator_connection, FileURL, ctx, Filename)
+                download_and_upload_file_to_sharepoint(orchestrator_connection, FileURL, ctx, Filename, Folder)
                 cursor.execute("""
                     INSERT INTO [dbo].[VejmanVedlaeg] (ID, NONCE, [FILE])
                     VALUES (?, ?, ?)
@@ -151,12 +151,11 @@ def sanitize_file_name(file_name):
     file_name = re.sub(pattern, "", file_name)
     file_name = re.sub(r"\s+", " ", file_name).strip()
     return file_name
-def download_and_upload_file_to_sharepoint(orchestrator_connection: OrchestratorConnection, FileURL, ctx: ClientContext, Filename ):
+def download_and_upload_file_to_sharepoint(orchestrator_connection: OrchestratorConnection, FileURL, ctx: ClientContext, Filename, folder):
     # Start downloading with a progress bar
     response = requests.get(FileURL, stream=True, timeout = 60)
     response.raise_for_status()  
 
-    total_size = int(response.headers.get("content-length", 0))  
     block_size = 8192  # Download in chunks of 8KB
 
     with open(Filename, "wb") as file:
@@ -164,7 +163,7 @@ def download_and_upload_file_to_sharepoint(orchestrator_connection: Orchestrator
             file.write(chunk)
 
     orchestrator_connection.log_info(f"{Filename} downloaded successfully to: {Filename}")
-
+    folder = ctx.web.get_folder_by_server_relative_url(folder)
     with open(Filename, "rb") as file_content:
         folder.files.add(Filename, file_content, True)  
         ctx.execute_query()
