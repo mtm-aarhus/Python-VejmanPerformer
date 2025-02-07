@@ -11,7 +11,7 @@ import re
 import pyodbc
 
 def process(orchestrator_connection: OrchestratorConnection, queue_element: QueueElement | None = None) -> None:
-    orchestrator_connection = OrchestratorConnection("VejManPerformer", os.getenv('OpenOrchestratorSQL'), os.getenv('OpenOrchestratorKey'), None)
+   
     orchestrator_connection.log_info("Started process")
 
     RobotCredentials = orchestrator_connection.get_credential('Robot365User')
