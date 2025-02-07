@@ -11,6 +11,7 @@ import re
 import pyodbc
 
 def process(orchestrator_connection: OrchestratorConnection, queue_element: QueueElement | None = None) -> None:
+    orchestrator_connection = OrchestratorConnection("VejManPerformer", os.getenv('OpenOrchestratorSQL'), os.getenv('OpenOrchestratorKey'), None)
     orchestrator_connection.log_info("Started process")
 
     RobotCredentials = orchestrator_connection.get_credential('Robot365User')
@@ -63,7 +64,7 @@ def process(orchestrator_connection: OrchestratorConnection, queue_element: Queu
     cursor = conn.cursor()
 
     cursor.execute("""
-                SELECT NONCE FROM [dbo].[VejmanVedlaeg]
+                SELECT NONCE, [FILE] FROM [dbo].[VejmanVedlaeg]
                 WHERE ID = ? 
             """, (CaseID,))
     rows = cursor.fetchall()
@@ -89,7 +90,7 @@ def process(orchestrator_connection: OrchestratorConnection, queue_element: Queu
         FileID = item['id']
         FileURL = f"https://vejman.vd.dk/permissions/getfile?fileid={FileID}&nonce={Nonce}&token={VejmanToken}"
 
-        if ".msg" not in Filename:
+        if ".msg" in Filename:
             continue
 
         if Nonce not in existing_files:
