@@ -77,6 +77,10 @@ def process(orchestrator_connection: OrchestratorConnection, queue_element: Queu
 
     # Process new attachments
     for item in att:
+        if 'approved' not in item:
+            approved = False
+        else:
+            approved = item['approved']
         Nonce = str(item['nonce'])  # Ensure it's a string for comparison
         Filename = item['file_name']
         Filename_start, Filename_end = Filename.rsplit('.', 1)
@@ -89,7 +93,7 @@ def process(orchestrator_connection: OrchestratorConnection, queue_element: Queu
             continue
 
         if Nonce not in existing_files:
-            if item['approved']:
+            if approved:
                 conn.commit()  # Save changes to the database
                 orchestrator_connection.log_info(f"Added new row with ID '{CaseID}', nonce '{Nonce}' and Filename '{Filename}'")
 
@@ -101,7 +105,7 @@ def process(orchestrator_connection: OrchestratorConnection, queue_element: Queu
                 conn.commit()
         else:
             # If already in existing nonces:
-            if not item['approved']:
+            if not approved:
                 # Deleting from SharePoint
                 delete_file_if_exists(f'{folder}/{Filename}', ctx)
                 
