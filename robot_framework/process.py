@@ -11,9 +11,6 @@ import re
 import pyodbc
 
 def process(orchestrator_connection: OrchestratorConnection, queue_element: QueueElement | None = None) -> None:
-   
-    orchestrator_connection.log_info("Started process")
-
     RobotCredentials = orchestrator_connection.get_credential('Robot365User')
     username = RobotCredentials.username
     password = RobotCredentials.password
@@ -138,6 +135,8 @@ def process(orchestrator_connection: OrchestratorConnection, queue_element: Queu
     cursor.close()
     conn.close()       
 
+  
+
 def delete_file_if_exists(ctx, file_relative_url):
     try:
         file = File.from_url(file_relative_url)
@@ -163,9 +162,9 @@ def download_and_upload_file_to_sharepoint(orchestrator_connection: Orchestrator
             file.write(chunk)
 
     orchestrator_connection.log_info(f"{Filename} downloaded successfully to: {Filename}")
-    folder = ctx.web.get_folder_by_server_relative_url(folder)
+    sharepoint_folder = ctx.web.get_folder_by_server_relative_url(folder)
     with open(Filename, "rb") as file_content:
-        folder.files.add(Filename, file_content, True)  
+        sharepoint_folder.files.add(Filename, file_content, True)  
         ctx.execute_query()
 
-        orchestrator_connection.log_info(f"Uploaded: {Filename} to {Folder}")
+    orchestrator_connection.log_info(f"Uploaded: {Filename} to {folder}")
