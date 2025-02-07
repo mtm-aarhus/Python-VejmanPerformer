@@ -15,25 +15,18 @@ def process(orchestrator_connection: OrchestratorConnection, queue_element: Queu
     username = RobotCredentials.username
     password = RobotCredentials.password
 
-    queue_item = orchestrator_connection.get_next_queue_element('VejmanPerformer')
-    if not queue_item:
-        orchestrator_connection.log_info("No new queue items to process.")
-        exit()
-    json_obj = json.loads(queue_item.data)
+    json_obj = json.loads(queue_element.data)
 
     orchestrator_connection.log_info("Assigning variables")
 
     Tilladelse = json_obj.get('case_number')
-    Adresse = json_obj.get('vejnavn')
     CaseID = json_obj.get('case_id')
     Folder = json_obj.get('sharepoint_folder')
-    DownloadFolder = os.path.join(os.path.expanduser("~"), "Downloads")
     VejmanToken = orchestrator_connection.get_credential("VejmanToken").password
 
     orchestrator_connection.log_info(f'Starter Vejmanproces for tilladelse nr. {Tilladelse}')
 
     SharePointUrl = orchestrator_connection.get_constant('AarhusKommuneSharePoint').value + '/Teams/tea-teamsite10014'
-    downloads_folder = os.path.join(os.path.expanduser("~"), "Downloads", "VejmanPerformer")  ###No need for folder
 
     #Create sharepoint connection to folder
     credentials = UserCredential(username, password)
@@ -51,8 +44,6 @@ def process(orchestrator_connection: OrchestratorConnection, queue_element: Queu
     response.raise_for_status()
 
     data = json.loads(response.text).get('data')
-    approved_files = []
-    approved_nonces = []
 
     #Connecting to the SQL-server:
     sql_server = orchestrator_connection.get_constant("SqlServer")
@@ -134,8 +125,6 @@ def process(orchestrator_connection: OrchestratorConnection, queue_element: Queu
     # Close the connection
     cursor.close()
     conn.close()       
-
-  
 
 def delete_file_if_exists(ctx, file_relative_url, orchestrator_connection):
     try:
