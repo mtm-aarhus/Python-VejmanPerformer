@@ -145,6 +145,7 @@ def delete_file_if_exists(ctx, file_relative_url, orchestrator_connection):
         orchestrator_connection.log_info(f"File '{file_relative_url}' successfully deleted!")
     except Exception as e:
         orchestrator_connection.log_info(f"File not found or cannot be deleted: {str(e)}")
+        raise 
 def sanitize_file_name(file_name):
     pattern = r'[~#%&*{}\[\]\\:<>?/+|$¤£€\"\t]'
     file_name = re.sub(pattern, "", file_name)
