@@ -126,15 +126,15 @@ def process(orchestrator_connection: OrchestratorConnection, queue_element: Queu
     cursor.close()
     conn.close()       
 
-def delete_file_if_exists(ctx, file_relative_url, orchestrator_connection):
+def delete_file_if_exists(file_relative_url, ctx, orchestrator_connection):
     try:
-        file = File.from_url(file_relative_url)
+        file = ctx.web.get_file_by_server_relative_url(file_relative_url)
         file.delete_object()
-        ctx.execute_query()
+        ctx.execute_query()  # This will work because `file` is tied to `ctx`
         orchestrator_connection.log_info(f"File '{file_relative_url}' successfully deleted!")
     except Exception as e:
-        orchestrator_connection.log_info(f"File not found or cannot be deleted: {str(e)}")
-        raise 
+        orchestrator_connection.log_error(f"Failed to delete file '{file_relative_url}': {str(e)}")
+        
 def sanitize_file_name(file_name):
     pattern = r'[~#%&*{}\[\]\\:<>?/+|$¤£€\"\t]'
     file_name = re.sub(pattern, "", file_name)
