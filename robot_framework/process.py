@@ -33,7 +33,7 @@ def process(orchestrator_connection: OrchestratorConnection, queue_element: Queu
     ctx = ClientContext(SharePointUrl).with_credentials(credentials)
 
     #Create path to folder
-    folder = ctx.web.get_folder_by_server_relative_url(Folder)  ##Man kan execute i slutningen af linjen
+    folder = ctx.web.get_folder_by_server_relative_url(Folder)  
 
     #Randomnumber making
     RandomNum = str(int(time.time()*1000))
@@ -62,7 +62,7 @@ def process(orchestrator_connection: OrchestratorConnection, queue_element: Queu
 
     # Get nonces from new attachments
     att = data['attachments']
-    new_nonces = {str(item['nonce']) for item in att}
+    new_nonces = {str(item['id']) + '_' + str(item['nonce']) for item in att}
 
     # Process new attachments
     for item in att:
@@ -77,20 +77,20 @@ def process(orchestrator_connection: OrchestratorConnection, queue_element: Queu
         Filename = f'{Filename_start}.{Filename_end}' 
         FileID = item['id']
         FileURL = f"https://vejman.vd.dk/permissions/getfile?fileid={FileID}&nonce={Nonce}&token={VejmanToken}"
-
+        ID_Nonce = str(FileID) + '_' + Nonce
         if ".msg" in Filename:
             continue
 
-        if Nonce not in existing_files:
+        if ID_Nonce not in existing_files:
             if approved:
                 conn.commit()  # Save changes to the database
-                orchestrator_connection.log_info(f"Added new row with ID '{CaseID}', nonce '{Nonce}' and Filename '{Filename}'")
+                orchestrator_connection.log_info(f"Added new row with ID '{CaseID}', nonce '{ID_Nonce}' and Filename '{Filename}'")
 
                 download_and_upload_file_to_sharepoint(orchestrator_connection, FileURL, ctx, Filename, Folder)
                 cursor.execute("""
                     INSERT INTO [dbo].[VejmanVedlaeg] (ID, NONCE, [FILE])
                     VALUES (?, ?, ?)
-                """, (CaseID, Nonce, Filename))
+                """, (CaseID, ID_Nonce, Filename))
                 conn.commit()
         else:
             # If already in existing nonces:
@@ -102,7 +102,7 @@ def process(orchestrator_connection: OrchestratorConnection, queue_element: Queu
                 cursor.execute("""
                     DELETE FROM [dbo].[VejmanVedlaeg] 
                     WHERE NONCE = ? AND ID = ?
-                """, (Nonce, CaseID))
+                """, (ID_Nonce, CaseID))
                 conn.commit()
 
     missing_nonces = set(existing_files.keys()) - new_nonces  # Find nonces that exist in DB but not in `att`
