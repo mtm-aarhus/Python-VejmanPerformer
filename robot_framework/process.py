@@ -96,7 +96,7 @@ def process(orchestrator_connection: OrchestratorConnection, queue_element: Queu
             # If already in existing nonces:
             if not approved:
                 # Deleting from SharePoint
-                delete_file_if_exists(f'{folder}/{Filename}', ctx, orchestrator_connection)
+                delete_file_if_exists(f'{Folder}/{Filename}', ctx, orchestrator_connection)
                 
                 # Deleting from the database
                 cursor.execute("""
@@ -111,7 +111,7 @@ def process(orchestrator_connection: OrchestratorConnection, queue_element: Queu
         missing_filename = existing_files[missing_nonce]  # Get the filename associated with the nonce
 
         # Delete the file from SharePoint
-        delete_file_if_exists(f'{folder}/{missing_filename}', ctx, orchestrator_connection)
+        delete_file_if_exists(f'{Folder}/{missing_filename}', ctx, orchestrator_connection)
 
         # Remove entry from the database
         cursor.execute("""
@@ -134,7 +134,7 @@ def delete_file_if_exists(file_relative_url, ctx, orchestrator_connection):
         orchestrator_connection.log_info(f"File '{file_relative_url}' successfully deleted!")
     except Exception as e:
         orchestrator_connection.log_error(f"Failed to delete file '{file_relative_url}': {str(e)}")
-        
+
 def sanitize_file_name(file_name):
     pattern = r'[~#%&*{}\[\]\\:<>?/+|$¤£€\"\t]'
     file_name = re.sub(pattern, "", file_name)
