@@ -19,7 +19,8 @@ dependencies = [
     "OpenOrchestrator == 1.*",
     "Pillow == 10.*",
     "Office365-REST-Python-Client == 2.5.14",
-    "requests == 2.32.3"
+    "requests == 2.32.3",
+    "pip-system-certs"
 ]
 
 [project.optional-dependencies]
