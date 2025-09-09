@@ -32,6 +32,17 @@ def process(orchestrator_connection: OrchestratorConnection, queue_element: Queu
     credentials = UserCredential(username, password)
     ctx = ClientContext(SharePointUrl).with_credentials(credentials)
 
+    certification = orchestrator_connection.get_credential("SharePointCert")
+    api = orchestrator_connection.get_credential("SharePointAPI")
+    
+    cert_credentials = {
+        "tenant": api.username,
+        "client_id": api.password,
+        "thumbprint": certification.username,
+        "cert_path": certification.password
+    }
+    ctx = ClientContext(SharePointUrl).with_client_certificate(**cert_credentials)
+
     #Create path to folder
     folder = ctx.web.get_folder_by_server_relative_url(Folder)  
 
