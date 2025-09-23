@@ -84,7 +84,11 @@ def process(orchestrator_connection: OrchestratorConnection, queue_element: Queu
         Nonce = str(item['nonce'])  # Ensure it's a string for comparison
         Filename = item['file_name']
         orchestrator_connection.log_info(Filename)
-        Filename_start, Filename_end = Filename.rsplit('.', 1)
+        try:
+            Filename_start, Filename_end = Filename.rsplit('.', 1)
+        except: 
+            Filename_start = Filename
+            Filename_end = "pdf"
         Filename_start = sanitize_file_name(Filename_start.replace('.', ""))
         Filename = f'{Filename_start}.{Filename_end}' 
         FileID = item['id']
