@@ -83,6 +83,7 @@ def process(orchestrator_connection: OrchestratorConnection, queue_element: Queu
             approved = item['approved']
         Nonce = str(item['nonce'])  # Ensure it's a string for comparison
         Filename = item['file_name']
+        orchestrator_connection.log_info(Filename)
         Filename_start, Filename_end = Filename.rsplit('.', 1)
         Filename_start = sanitize_file_name(Filename_start.replace('.', ""))
         Filename = f'{Filename_start}.{Filename_end}' 
