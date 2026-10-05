@@ -16,11 +16,11 @@ classifiers = [
     "Operating System :: Microsoft :: Windows",
 ]
 dependencies = [
-    "OpenOrchestrator == 3.*",
-    "Pillow == 10.*",
-    "Office365-REST-Python-Client == 2.5.14",
-    "requests == 2.32.3",
-    "pip-system-certs"
+    "OpenOrchestrator==3.0.0",
+    "Pillow==10.4.0",
+    "Office365-REST-Python-Client==2.5.14",
+    "requests==2.32.3",
+    "pip-system-certs==5.3"
 ]
 
 [project.optional-dependencies]
